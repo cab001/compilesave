@@ -24,12 +24,29 @@
         "command": "gemini.processError",
         "title": "Explain with Gemini"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Gemini Settings",
+      "properties": {
+        "gemini.serverUrl": {
+          "type": "string",
+          "default": "https://server-compilesafe-ix6epxzl5-monelies-projects.vercel.app/api/explain",
+          "description": "Full URL to the server endpoint that processes error messages. Include path (e.g. /api/explain)."
+        },
+        "gemini.useServer": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, send error messages to the server and fall back to the local Python helper if the server fails."
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "vscode-test",
+    "test:server": "node test/check_server_contract.js",
     "setup:python": "python3 -m pip install --upgrade google-genai"
   },
   "devDependencies": {

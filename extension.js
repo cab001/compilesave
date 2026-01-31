@@ -1,11 +1,12 @@
 const vscode = require('vscode');
 const { spawn } = require('child_process');
 const path = require('path');
+const https = require('https');
 
 // ==========================================
 // ZONE A: THE ENGINE (The Bridge to Python)
 // ==========================================
-function callGeminiPython(errorMessage) {
+function callGeminiLocalPython(errorMessage) {
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(__dirname, 'python', 'main.py');
         const pythonCmd = process.platform === "win32" ? "python" : "python3";
@@ -44,6 +45,83 @@ function callGeminiPython(errorMessage) {
             }
         });
     });
+} 
+
+// Try the hosted server first, fallback to local python if server is down or misconfigured
+function callGemini(errorMessage) {
+    return new Promise(async (resolve, reject) => {
+        const cfg = vscode.workspace.getConfiguration('gemini');
+        const serverUrl = cfg.get('serverUrl') || 'https://server-compilesafe-ix6epxzl5-monelies-projects.vercel.app/api/explain';
+        const useServer = cfg.get('useServer') ?? true;
+
+        if (useServer && serverUrl) {
+            try {
+                const urlObj = new URL(serverUrl);
+                const body = JSON.stringify({ message: String(errorMessage || '') });
+                const options = {
+                    method: 'POST',
+                    hostname: urlObj.hostname,
+                    path: urlObj.pathname + (urlObj.search || ''),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(body)
+                    },
+                    timeout: 10000
+                };
+                if (urlObj.port) options.port = urlObj.port;
+
+                const req = https.request(options, (res) => {
+                    let data = '';
+                    res.on('data', chunk => data += chunk);
+                    res.on('end', async () => {
+                        try {
+                            if (res.statusCode >= 200 && res.statusCode < 300) {
+                                const parsed = JSON.parse(data);
+                                resolve(parsed);
+                                return;
+                            }
+                        } catch (err) {
+                            // parse error -> fall through to fallback
+                        }
+                        // server returned non-success or invalid JSON: try local
+                        try {
+                            const fallback = await callGeminiLocalPython(errorMessage);
+                            resolve(fallback);
+                        } catch (e) {
+                            reject('Server failed and fallback failed: ' + (e && e.message ? e.message : e));
+                        }
+                    });
+                });
+
+                req.on('error', async (err) => {
+                    try {
+                        const fallback = await callGeminiLocalPython(errorMessage);
+                        resolve(fallback);
+                    } catch (e) {
+                        reject('Server request failed and fallback failed: ' + err.message);
+                    }
+                });
+
+                req.on('timeout', () => {
+                    req.destroy(new Error('Request timed out'));
+                });
+
+                req.write(body);
+                req.end();
+                return;
+            } catch (err) {
+                // proceed to fallback
+            }
+        }
+
+        // fallback to local python
+        try {
+            const res = await callGeminiLocalPython(errorMessage);
+            resolve(res);
+        } catch (err) {
+            reject(err);
+        }
+    });
 }
 
 // ==========================================
@@ -77,7 +155,7 @@ function activate(context) {
             title: "Gemini is simplifying...",
         }, async () => {
             try {
-                const aiResponse = await callGeminiPython(msg);
+                const aiResponse = await callGemini(msg);
                 if (aiResponse && aiResponse.explanation) {
                     const expl = aiResponse.explanation;
                     vscode.window.showInformationMessage(`Gemini: ${expl}`);
