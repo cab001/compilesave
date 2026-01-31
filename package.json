@@ -9,18 +9,28 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:gemini.processError",
+    "onCommand:compilesave.compileSave"
+  ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "compilesave.compileSave",
-      "title": "Compile Save"
-    }]
+    "commands": [
+      {
+        "command": "compilesave.compileSave",
+        "title": "Compile Save"
+      },
+      {
+        "command": "gemini.processError",
+        "title": "Explain with Gemini"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "setup:python": "python3 -m pip install --upgrade google-genai"
   },
   "devDependencies": {
     "@types/vscode": "^1.108.1",

@@ -9,6 +9,9 @@
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
+			"env": {
+				"GEMINI_API_KEY": "AIzaSyDtBBlFAIG-0AcXMb1SGK16ycFXs2O_TKs"
+			},
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			]
