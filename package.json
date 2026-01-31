@@ -15,6 +15,10 @@
     "commands": [{
       "command": "compilesave.compileSave",
       "title": "Compile Save"
+    },
+    {
+      "command": "ttsExtension.speakSelection",
+      "title": "Speak Selected Text"
     }]
   },
   "scripts": {
