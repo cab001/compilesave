@@ -6,52 +6,52 @@ const https = require('https');
 // ==========================================
 // ZONE A: THE ENGINE (The Bridge to Python)
 // ==========================================
-function callGeminiLocalPython(errorMessage) {
-    return new Promise((resolve, reject) => {
-        const scriptPath = path.join(__dirname, 'python', 'main.py');
-        const pythonCmd = process.platform === "win32" ? "python" : "python3";
-        const args = [scriptPath, String(errorMessage || '')];
+// function callGeminiLocalPython(errorMessage) {
+//     return new Promise((resolve, reject) => {
+//         const scriptPath = path.join(__dirname, 'python', 'main.py');
+//         const pythonCmd = process.platform === "win32" ? "python" : "python3";
+//         const args = [scriptPath, String(errorMessage || '')];
 
-        // Ensure the spawned process inherits environment variables (like GEMINI_API_KEY)
-        const pyProcess = spawn(pythonCmd, args, { env: process.env });
+//         // Ensure the spawned process inherits environment variables (like GEMINI_API_KEY)
+//         const pyProcess = spawn(pythonCmd, args, { env: process.env });
 
-        let stdout = "";
-        let stderr = "";
-        const timeoutMs = 15000; // 15s
-        const timeout = setTimeout(() => {
-            try { pyProcess.kill(); } catch (e) {}
-            reject("AI helper timed out after 15s");
-        }, timeoutMs);
+//         let stdout = "";
+//         let stderr = "";
+//         const timeoutMs = 15000; // 15s
+//         const timeout = setTimeout(() => {
+//             try { pyProcess.kill(); } catch (e) {}
+//             reject("AI helper timed out after 15s");
+//         }, timeoutMs);
 
-        pyProcess.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
-        pyProcess.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
+//         pyProcess.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
+//         pyProcess.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
 
-        pyProcess.on('error', (err) => {
-            clearTimeout(timeout);
-            reject("Failed to start Python process: " + err.message);
-        });
+//         pyProcess.on('error', (err) => {
+//             clearTimeout(timeout);
+//             reject("Failed to start Python process: " + err.message);
+//         });
 
-        pyProcess.on('close', (code) => {
-            clearTimeout(timeout);
-            if (code !== 0) {
-                reject(`Python exited with code ${code}. Stderr: ${stderr || stdout}`);
-                return;
-            }
-            try {
-                const parsedResult = JSON.parse(stdout);
-                resolve(parsedResult);
-            } catch (err) {
-                reject("AI logic failed to return valid JSON");
-            }
-        });
-    });
-} 
+//         pyProcess.on('close', (code) => {
+//             clearTimeout(timeout);
+//             if (code !== 0) {
+//                 reject(`Python exited with code ${code}. Stderr: ${stderr || stdout}`);
+//                 return;
+//             }
+//             try {
+//                 const parsedResult = JSON.parse(stdout);
+//                 resolve(parsedResult);
+//             } catch (err) {
+//                 reject("AI logic failed to return valid JSON");
+//             }
+//         });
+//     });
+// } 
 
 // Try the hosted server first, fallback to local python if server is down or misconfigured
 function callGemini(errorMessage) {
     return new Promise(async (resolve, reject) => {
         const cfg = vscode.workspace.getConfiguration('gemini');
-        const serverUrl = cfg.get('serverUrl') || 'https://server-compilesafe-ix6epxzl5-monelies-projects.vercel.app/api/explain';
+        const serverUrl = cfg.get('serverUrl') || 'https://server-compilesafe.vercel.app/api/explain';
         const useServer = cfg.get('useServer') ?? true;
 
         if (useServer && serverUrl) {
