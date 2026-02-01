@@ -10,6 +10,8 @@
     "Other"
   ],
   "activationEvents": [
+    "onCommand:gemini.processError",
+    "onCommand:compilesave.compileSave",
     "onCommand:compilesave.gcc",
     "onCommand:compilesave.javac",
     "onCommand:compilesave.tsc",
@@ -18,6 +20,14 @@
   "main": "./extension.js",
   "contributes": {
     "commands": [
+      {
+        "command": "compilesave.compileSave",
+        "title": "Compile Save"
+      },
+      {
+        "command": "gemini.processError",
+        "title": "Explain with Gemini"
+      },
       {
         "command": "compilesave.gcc",
         "title": "Compile with GCC"
@@ -34,12 +44,30 @@
         "command": "tts.speakClipboard",
         "title": "Speak Clipboard Text"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Gemini Settings",
+      "properties": {
+        "gemini.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:3000/api/explain",
+          "description": "Full URL to the server endpoint that processes error messages. Include path (e.g. /api/explain)."
+        },
+        "gemini.useServer": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, send error messages to the server and fall back to the local Python helper if the server fails."
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "test:server": "node test/check_server_contract.js",
+    "setup:python": "python3 -m pip install --upgrade google-genai"
   },
   "devDependencies": {
     "@types/vscode": "^1.108.1",
