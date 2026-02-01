@@ -1,7 +1,7 @@
 {
   "name": "compilesave",
   "displayName": "CompileSave",
-  "description": "A VsCode extension that simplifies error messages",
+  "description": "A VS Code extension that simplifies error messages",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.108.1"
@@ -12,24 +12,29 @@
   "activationEvents": [
     "onCommand:compilesave.gcc",
     "onCommand:compilesave.javac",
-    "onCommand:compilesave.tsc"
+    "onCommand:compilesave.tsc",
+    "onCommand:tts.speakClipboard"
   ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
-      "command": "compilesave.gcc",
-      "title": "Compile with GCC"
+        "command": "compilesave.gcc",
+        "title": "Compile with GCC"
       },
       {
-      "command": "compilesave.javac",
-      "title": "Compile with JavaC"
+        "command": "compilesave.javac",
+        "title": "Compile with JavaC"
       },
       {
-      "command": "compilesave.tsc",
-      "title": "Compile with TSC"
+        "command": "compilesave.tsc",
+        "title": "Compile with TSC"
+      },
+      {
+        "command": "tts.speakClipboard",
+        "title": "Speak Clipboard Text"
       }
-  ]
+    ]
   },
   "scripts": {
     "lint": "eslint .",
