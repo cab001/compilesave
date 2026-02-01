@@ -9,13 +9,27 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:compilesave.gcc",
+    "onCommand:compilesave.javac",
+    "onCommand:compilesave.tsc"
+  ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "compilesave.compileSave",
-      "title": "Compile Save"
-    }]
+    "commands": [
+      {
+      "command": "compilesave.gcc",
+      "title": "Compile with GCC"
+      },
+      {
+      "command": "compilesave.javac",
+      "title": "Compile with JavaC"
+      },
+      {
+      "command": "compilesave.tsc",
+      "title": "Compile with TSC"
+      }
+  ]
   },
   "scripts": {
     "lint": "eslint .",
