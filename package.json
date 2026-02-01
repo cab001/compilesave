@@ -17,8 +17,8 @@
       "title": "Compile Save"
     },
     {
-      "command": "ttsExtension.speakSelection",
-      "title": "Speak Selected Text"
+      "command": "tts.speakClipboard",
+      "title": "Speak Clipboard Text"
     }]
   },
   "scripts": {

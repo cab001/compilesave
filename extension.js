@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 const { exec } = require('child_process');
+const os = require('os');
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -16,15 +17,18 @@ function activate(context) {
 	// The commandId parameter must match the command field in package.json
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-    	'ttsExtension.speakSelection',
-    	() => {
-      	const editor = vscode.window.activeTextEditor;
-      	if (!editor) return;
+    	'tts.speakClipboard',
+    	async () => {
+      	const text = await vscode.env.clipboard.readText();
 
-    	const text = editor.document.getText(editor.selection);
-    	speak(text);
+      	if (!text) {
+        	vscode.window.showWarningMessage('Clipboard is empty');
+        	return;
+      	}
+
+      	speak(text);
     	}
-  		),	
+  		),
 
 		vscode.commands.registerCommand('compilesave.compileSave', function () {
 		// The code you place here will be executed every time your command is executed
@@ -38,20 +42,21 @@ function activate(context) {
 }
 
 function speak(text) {
-  if (!text) return;
+  const platform = os.platform();
 
-  let command;
-
-  if (process.platform === 'darwin') {
-    command = `say "${text.replace(/"/g, '\\"')}"`;
-  } else if (process.platform === 'win32') {
-    command = `powershell -Command "Add-Type -AssemblyName System.Speech; `
-      + `(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('${text.replace(/'/g, "''")}')"`
+  if (platform === 'darwin') {
+    // macOS
+    exec(`say "${text.replace(/"/g, '\\"')}"`);
+  } else if (platform === 'win32') {
+    // Windows
+    exec(
+      `powershell -Command "Add-Type -AssemblyName System.Speech; ` +
+      `(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('${text.replace(/'/g, "''")}')"`
+    );
   } else {
-    command = `espeak "${text.replace(/"/g, '\\"')}"`;
+    // Linux
+    exec(`espeak "${text.replace(/"/g, '\\"')}"`);
   }
-
-  exec(command);
 }
 
 // This method is called when your extension is deactivated
