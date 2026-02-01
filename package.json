@@ -1,7 +1,7 @@
 {
   "name": "compilesave",
   "displayName": "CompileSave",
-  "description": "A VsCode extension that simplifies error messages",
+  "description": "A VS Code extension that simplifies error messages",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.108.1"
@@ -11,7 +11,11 @@
   ],
   "activationEvents": [
     "onCommand:gemini.processError",
-    "onCommand:compilesave.compileSave"
+    "onCommand:compilesave.compileSave",
+    "onCommand:compilesave.gcc",
+    "onCommand:compilesave.javac",
+    "onCommand:compilesave.tsc",
+    "onCommand:tts.speakClipboard"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -23,6 +27,22 @@
       {
         "command": "gemini.processError",
         "title": "Explain with Gemini"
+      },
+      {
+        "command": "compilesave.gcc",
+        "title": "Compile with GCC"
+      },
+      {
+        "command": "compilesave.javac",
+        "title": "Compile with JavaC"
+      },
+      {
+        "command": "compilesave.tsc",
+        "title": "Compile with TSC"
+      },
+      {
+        "command": "tts.speakClipboard",
+        "title": "Speak Clipboard Text"
       }
     ],
     "configuration": {
