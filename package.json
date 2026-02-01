@@ -31,7 +31,7 @@
       "properties": {
         "gemini.serverUrl": {
           "type": "string",
-          "default": "https://server-compilesafe.vercel.app/api/explain",
+          "default": "http://localhost:3000/api/explain",
           "description": "Full URL to the server endpoint that processes error messages. Include path (e.g. /api/explain)."
         },
         "gemini.useServer": {
