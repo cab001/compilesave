@@ -34,6 +34,7 @@ function createCompilerTerminal(label) {
   };
 }
 
+
 /**
  * Runs a compiler and writes colored output to a pseudoterminal
  */
@@ -43,9 +44,12 @@ function runCompiler(command, args, label) {
 
   const proc = spawn(command, args, { shell: false });
 
-  proc.stdout.on('data', (data) => {
-    write(data.toString());
-  });
+
+//   proc.stdout.on('data', (data) => {
+//     const text = data.toString();
+//     write(text)
+//     //write(data.toString());
+//   });
 
   proc.stderr.on('data', (data) => {
     const lines = data.toString().split('\n');
@@ -65,14 +69,43 @@ function runCompiler(command, args, label) {
     }
   });
 
+    // chat code
+    let sentToGemini = false;
+
+    proc.stderr.on('data', async (data) => {
+        const text = data.toString();
+        write(text)
+        //write(data.toString());
+
+        if (!sentToGemini && /error|exception|failed/i.test(text)) {
+            sentToGemini = true;
+
+            try {
+            const aiResponse = await callGemini(text);
+            if (aiResponse?.explanation) {
+                vscode.window.showInformationMessage(
+                `Gemini: ${aiResponse.explanation}`
+                );
+            }
+            } catch (err) {
+            vscode.window.showErrorMessage('Gemini error: ' + err);
+            }
+        }
+    });
+
+
   proc.on('close', (code) => {
+    //console.log('banana3', msg);
     const msg =
       code === 0
         ? `${BOLD}${BLUE}✔ Compilation succeeded${RESET}\r\n`
         : `${BOLD}${RED}✖ Compilation failed (exit code ${code})${RESET}\r\n`;
 
+    //console.log('banana2', msg);
     write(msg);
+    //console.log('banana2', msg);
   });
+
 }
 
 /**
@@ -106,6 +139,7 @@ function speak(text) {
 // ZONE A: THE ENGINE (Server → Gemini)
 // ==========================================
 async function callGemini(errorMessage) {
+    console.log('banana', errorMessage); 
     const cfg = vscode.workspace.getConfiguration('gemini');
     const serverUrl =
         cfg.get('serverUrl') ||
@@ -113,7 +147,8 @@ async function callGemini(errorMessage) {
 
     const urlObj = new URL(serverUrl);
     // const body = JSON.stringify({ message: String(errorMessage || '') });
-    const body = JSON.stringify({message:'BADHSJKDHJKSHDJKAHSDJKHASJKDHAKSDHAJK'})
+    //const body = JSON.stringify({message:'BADHSJKDHJKSHDJKAHSDJKHASJKDHAKSDHAJK'})
+    const body = JSON.stringify({message:String(errorMessage)})
 
     const transport = urlObj.protocol === 'http:' ? http : https;
 
@@ -159,7 +194,7 @@ async function callGemini(errorMessage) {
 // ==========================================
 const myTerminalScanner = {
     provideTerminalLinks: (context) => {
-        const regex = /(error|exception|fail|failed): .*/gi;
+        const regex = /(error|exception|fail|failed):.*/gi;
         return [...context.line.matchAll(regex)].map(m => ({
             startIndex: m.index,
             length: m[0].length,
@@ -176,6 +211,17 @@ const myTerminalScanner = {
 // ==========================================
 function activate(context) {
     console.log('Gemini Extension active');
+    //new 
+
+    //const proc = spawn(command, args, { shell: false });
+
+
+  
+
+    // proc.stdout.on('data', (data) => {
+    //     write(data.toString());
+    // });
+    //end 
 
     const processCmd = vscode.commands.registerCommand(
         'gemini.processError',
@@ -187,7 +233,8 @@ function activate(context) {
                 },
                 async () => {
                     try {
-                        const aiResponse = await callGemini(msg);
+                        console.log('banana1', msg);
+                        const aiResponse = await callGemini(msg);//(msg);
                         
 
                         if (aiResponse?.explanation) {
